@@ -1,0 +1,58 @@
+apply plugin: 'com.android.library'
+
+def buildName = "XGLib_AutoUpdate"
+def buildVersionCode = 2
+def buildVersionName = "1.0.2"
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "28.0.3"
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 26
+        versionCode buildVersionCode
+        versionName buildVersionName
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    // 自定生成文件名
+    android.libraryVariants.all { variant ->
+        variant.outputs.all {
+            // 名称+当前版本号
+            def fileName = "${buildName}_${buildVersionName}"
+
+            // 如果有渠道，显示渠道名""
+            if (variant.flavorName != "") {
+                fileName = fileName + "_${variant.flavorName}"
+            }
+            // 加入打包，如20181010
+            def releaseDate = new Date().format("yyyyMMdd", TimeZone.getDefault())
+            fileName = fileName + "_${releaseDate}"
+
+            // 如果是debug版本，加入debug
+            if ('debug' == variant.buildType.name) {
+                fileName = fileName + "_debug"
+            }
+
+            outputFileName = fileName + ".aar"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+}
